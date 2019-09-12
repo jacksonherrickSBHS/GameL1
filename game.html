@@ -1,0 +1,26 @@
+<!doctype html>
+
+<body>
+    <canvas id="gameCanvas" width="650" height="500"></canvas>
+    <script>
+        var canvas, canvasContext;
+
+        window.onload = function() {
+            canvas = document.getElementById('gameCanvas');
+            canvasContext = canvas.getContext('2d');
+
+            setInterval(mainloop, 1000 / 50);
+        }
+        
+        function mainloop(){
+            colorRect(0,0,canvas.width,canvas.height,'black'); // background black square
+            colorRect(20,20,40,40,'red'); // background black square
+        }
+        
+        function colorRect(x,y,w,h,c){
+            canvasContext.fillStyle = c;
+            canvasContext.fillRect(x,y,w,h);
+        }
+        
+    </script>
+</body>
