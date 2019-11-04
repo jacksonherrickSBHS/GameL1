@@ -6,6 +6,7 @@
 
 <body>
     <canvas id="gameCanvas" width="600" height="600"></canvas>
+
     <script>
         var canvas, canvasContext;
 
@@ -14,7 +15,7 @@
             canvasContext = canvas.getContext('2d');
 
             for (var i = 0; i < brickCount; i++) {
-                bricks.push(randBrick());
+                randBrick();
             }
 
             document.addEventListener('keydown', keyPressed);
@@ -23,77 +24,116 @@
             setInterval(mainloop, 1000 / 50);
         }
 
-         var username = '';
+        var username = '';
         while (username == '' || username == null) {
             username = prompt('What is your name?') || ''; //Variable that asks for name
         }
 
-      var difficulty = '';
+        var difficulty = '';
         var pass = false;
-       
-        while(pass == false){
+
+        while (pass == false) {
             difficulty = prompt('how hard do you want it?', 'hard or easy')
-           
-            if(difficulty.toLowerCase() == 'easy' || difficulty.toLowerCase() == 'hard'){
-                pass = true;
+            if (difficulty == null) {
+                difficulty = '';
             }
+            if (difficulty.toLowerCase() == 'easy' || difficulty.toLowerCase() == 'hard') {
+                pass = true; //if player puts in a word with uppercase it will automatically put it in lowercase
+            }
+        } //end of the difficulty ask
+
+        var minSpeed = 0;
+        var maxSpeed = 0;
+
+        if (difficulty.toLowerCase() == 'easy') {
+            maxSpeed = 8;
+            minSpeed = 6;
+        } else {
+            maxSpeed = 15;
+            minSpeed = 10;
         }
 
-
+        //player info
         var playerXpos = 0;
         var playerYpos = 0;
         var playerXspeed = 8;
         var playerYspeed = 3;
         var playerSize = 80;
-        
+        //brick info
         var brickXpos = 0;
         var brickYpos = 0;
         var brickYspeed = 3;
         var brickSize = 80;
 
 
-        var brickCount = 2;
+        var brickCount = 7;
 
         var score = 0;
         var death = 0;
+        var gamerun = true;
+        //score and death in game
+
 
         var bricks = [];
 
         const LEFT_KEY = 37;
         const RIGHT_KEY = 39;
-       
+
         var leftKeyPressed = false;
         var rightKeyPressed = false;
-        
+        //end of player variables
+
+
         var startingPos = true;
 
         var player = new Image();
-        player.src = 'images/8-bitheatblast.png'//change image of player to heatblast
-        
+        player.src = 'images/8-bitheatblast.png' //change image of player to heatblast
+
+        var brickImg = new Image();
+        brickImg.src = 'images/vilgaxdrone.png'
+
         function mainloop() {
-            colorRect(0, 0, canvas.width, canvas.height, 'black');
-            
-            colorText('score' + score,50,50,'20px Arial','white')
+            if (gamerun) {
 
-            drawImg(player, playerXpos, playerYpos, playerSize, playerSize, );
+                colorRect(0, 0, canvas.width, canvas.height, 'black')
 
-            playerMove();
-            bricksDraw();
-            bricksMove();
+                colorText('score' + score, 50, 50, '20px Arial', 'white')
 
-            if (startingPos) {
-                startPos();
-                startingPos = false;
+                drawImg(player, playerXpos, playerYpos, playerSize, playerSize, );
+
+                //            drawImg(brick, brickXpos, brickYpos, brickSize, brickSize, );
+
+
+
+
+
+                playerMove();
+                brickDraw();
+                brickMove();
+
+                if (startingPos) {
+                    startPos();
+                    startingPos = false;
+                }
+
+                if (death >= 1) {
+                    gamerun = false;
+                } //what happens if dead
+            } else {
+                colorRect(0, 0, canvas.width, canvas.height, 'black')
+
+                colorText(username + ' your score was ' + score, 50, 50, '20px Arial', 'white')
+
             }
         }
-
+        //this is where the player spawns at start of game
         function startPos() {
             playerXpos = canvas.width / 2 - (playerSize / 2);
             playerYpos = canvas.width - playerSize * 1.3;
         }
-
+        //start of the player move
         function keyPressed(evt) {
-
+            //lets the program know that when key pressed start moving in direction
             if (evt.keyCode == LEFT_KEY) {
                 leftKeyPressed = true;
             }
@@ -101,7 +141,7 @@
                 rightKeyPressed = true;
             }
         }
-
+        //lets the program know that when key realeased stop moving in direction
         function keyReleased(evt) {
             if (evt.keyCode == LEFT_KEY) {
                 leftKeyPressed = false;
@@ -121,45 +161,46 @@
                 playerXpos -= playerXspeed;
 
             }
+        } //end player move
 
-        }
-
-        function bricksDraw() {
+        function brickDraw() {
             bricks.forEach(function(brick, index, array) {
-                colorRect(brick.brickXpos, brick.brickYpos, brick.brickSize, brick.brickSize, 'white');
+                drawImg(brickImg, brick.brickXpos, brick.brickYpos, brick.brickSize, brick.brickSize);
             });
         }
-
-        function bricksMove() {
+        //start bricks move
+        function brickMove() {
             bricks.forEach(function(brick, index, array) {
 
                 brick.brickYpos += brick.brickYSpeed;
 
                 if (brick.brickXpos > canvas.width - brick.brickSize) {
 
-                }//bricks move
+                } //bricks move
                 if (brick.brickYpos > canvas.height) {
                     brick.brickSize = Math.floor(Math.random() * (50 - 20) + 20);
                     brick.brickYpos = 0 - brick.brickSize;
 
-                    brick.brickYSpeed = Math.floor(Math.random() * (15 - 3) + 3);
+                    brick.brickYSpeed = Math.floor(Math.random() * (maxSpeed - minSpeed) + minSpeed); +
+
                     score++;
 
                 } // collision
-                if (brick.brickYpos + brick.brickSize > playerYpos && brickYpos < playerYpos + playerSize && brick.brickXpos + brick.brickSize > playerXpos && brick.brickXpos < playerXpos + playerSize){
+                if (brick.brickYpos + brick.brickSize > playerYpos && brickYpos < playerYpos + playerSize && brick.brickXpos + brick.brickSize > playerXpos && brick.brickXpos < playerXpos + playerSize) {
                     console.log('hit');
                     startPos();
+                    death++;
                 }
 
             });
-        }
-
+        } //end bricks move
+        //makes the bricks spawn randomly
         function randBrick() {
             var brickSize = Math.floor(Math.random() * (50 - 20) + 20);
             var brickXpos = Math.floor(Math.random() * (canvas.width - brickSize));
             var brickYpos = Math.floor(Math.random() * (canvas.height - brickSize));
-            var brickXSpeed = Math.floor(Math.random() * (15 - 2) + 2);
-            var brickYSpeed = Math.floor(Math.random() * (15 - 2) + 2);
+            var brickXSpeed = Math.floor(Math.random() * (maxSpeed - minSpeed) + minSpeed);
+            var brickYSpeed = Math.floor(Math.random() * (maxSpeed - minSpeed) + minSpeed);
 
             var newBrickObject = {
                 brickSize: brickSize,
@@ -169,7 +210,7 @@
                 brickYSpeed: brickYSpeed
             }
 
-            return newBrickObject;
+            bricks.push(newBrickObject);
         }
 
         function drawImg(img, x, y, w, h) {
@@ -180,11 +221,11 @@
             canvasContext.fillStyle = c;
             canvasContext.fillRect(x, y, w, h);
         }
-        
-        function colorText(msg,x,y,f,c){
+
+        function colorText(msg, x, y, f, c) {
             canvasContext.fillStyle = c;
             canvasContext.font = f; //20px arial
-            canvasContext.fillText(msg,x,y);
+            canvasContext.fillText(msg, x, y);
         }
 
     </script>
